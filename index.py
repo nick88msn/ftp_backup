@@ -1,11 +1,22 @@
 import sys
 import ftputil
-
+import argparse
 import os
 from pathlib import Path
 import secrets
 
+
+# Parse user arguments from cli
+def parse_args():
+    parser = argparse.ArgumentParser(description='Backup a server or a folder through ftp protocol')
+    parser.add_argument("source", type=str, help="Add absolute path without beginning or ending /", default=''))
+    parser.add_argument("destination", type=str, help="Destination folder of the final mbox file. If ", default=os.path.join(os.getcwd(),'backup'))
+    args = parser.parse_args()
+    return args
+
+
 def downloadFiles(path,destination):
+    # Connect to host
     with ftputil.FTPHost(secrets.HOST,secrets.USER,secrets.PASSWORD) as ftp_host:
         try:
             # Input source formatted as "path/to/directory"
@@ -34,6 +45,8 @@ def downloadFiles(path,destination):
         except OSError as e:
             print(f"Error: {e}")
 
-source="public"
-dest="/Volumes/wd_blue/backup/server/register/"
-downloadFiles(source,dest)
+if __name__ == '__main__':
+    args = parse_args()
+    source=args.source
+    dest=args.destination
+    downloadFiles(source,dest)
