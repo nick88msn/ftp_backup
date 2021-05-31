@@ -1,51 +1,39 @@
 import sys
-import ftplib
+import ftputil
+
 import os
-from ftplib import FTP
 from pathlib import Path
 import secrets
 
-ftp=FTP(secrets.HOST)
-ftp.login(secrets.USER,secrets.PASSWORD)
-
 def downloadFiles(path,destination):
-#path & destination are str of the form "/dir/folder/something/"
-#path should be the abs path to the root FOLDER of the file tree to download
-    try:
-        ftp.cwd(path)
-        #clone path to destination
-        Path(destination[0:len(destination)-1]+path).mkdir(parents=True, exist_ok=True)
-        os.chdir(destination[0:len(destination)-1]+path)
-        print(destination[0:len(destination)-1]+path+" built")
-    except OSError:
-        #folder already exists at destination
-        pass
-    except ftplib.error_perm:
-        #invalid entry (ensure input form: "/dir/folder/something/")
-        print("error: could not change to "+path)
-        sys.exit("ending session")
-
-    #list children:
-    filelist=ftp.nlst()
-
-    for file in filelist:
+    with ftputil.FTPHost(secrets.HOST,secrets.USER,secrets.PASSWORD) as ftp_host:
         try:
-            #this will check if file is folder:
-            ftp.cwd(path+file+"/")
-            #if so, explore it:
-            print(f"{path}{file}/")
-            downloadFiles(path+file+"/",destination)
-        except ftplib.error_perm:
-            #not a folder with accessible content
-            #download & return
-            os.chdir(destination[0:len(destination)-1]+path)
-            #possibly need a permission exception catch:
-            print(os.path.join(destination[0:len(destination)-1],path,file))
-            with open(os.path.join(destination[0:len(destination)-1],path,file),"wb") as f:
-                ftp.retrbinary("RETR "+file, f.write)
-                print(file + " downloaded")
-    return
+            # Input source formatted as "path/to/directory"
+            ftp_host.chdir(path)
+            print(f"Changed ftp directory to: {path}")
+            current_local_folder = os.path.join(destination,path)
+            print(f"Updated current local folder to: {current_local_folder}")
+            Path(current_local_folder).mkdir(parents=True, exist_ok=True)
+            print(f"{os.path.join(destination,path)} created.")
+            list = ftp_host.listdir(ftp_host.curdir)
+            print(f"List of ftp folders and files:\n{list}")
+            for fname in list:
+                if ftp_host.path.isdir(fname):
+                    #launch recursive function with new source
+                    downloadFiles(os.path.join(path,fname),destination)
+                else:
+                    #download files in current destination folder
+                    try:
+                        ftp_host.synchronize_times()
+                        ftp_host.download_if_newer(os.path.join(fname),os.path.join(current_local_folder,fname))
+                    except ftputil.error.TimeShiftError as e:
+                        print(f"Could not sync timestamps with server. Forcing download")
+                        ftp_host.download(os.path.join(fname),os.path.join(current_local_folder,fname))
 
-source="/"
+                    print(f"Downloaded {os.path.join(path,fname)} in path {os.path.join(current_local_folder,fname)}")
+        except OSError as e:
+            print(f"Error: {e}")
+
+source="public"
 dest="/Volumes/wd_blue/backup/server/register/"
 downloadFiles(source,dest)

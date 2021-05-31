@@ -1,0 +1,28 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "4544a0a36c8da2c21aadf83cf190aa3f4d5da118377be8b63cb40767f88c760c"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.9"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "ftputil": {
+            "hashes": [
+                "sha256:394997ccb3cd4825c6e22b5e349c62cf5016c35db4d60940f3513db66d205561"
+            ],
+            "index": "pypi",
+            "version": "==5.0.1"
+        }
+    },
+    "develop": {}
+}
