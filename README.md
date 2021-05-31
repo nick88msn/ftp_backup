@@ -10,6 +10,13 @@ Destination local folder is the second argument of the script.
 pip3 install -r requirements.txt
 ```
 
+Create a secrets.py file and add the following information:
+```Python3
+HOST = 'ftp.yourwebserver.com'
+USER='your_username'
+PASSWORD='some_compliCATeD_P4SSwD'
+```
+
 ```Python
 python3 index.py source destination
 ```
