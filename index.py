@@ -9,7 +9,7 @@ import secrets
 # Parse user arguments from cli
 def parse_args():
     parser = argparse.ArgumentParser(description='Backup a server or a folder through ftp protocol')
-    parser.add_argument("source", type=str, help="Add absolute path without beginning or ending /", default=''))
+    parser.add_argument("source", type=str, help="Add absolute path without beginning or ending /", default='')
     parser.add_argument("destination", type=str, help="Destination folder of the final mbox file. If ", default=os.path.join(os.getcwd(),'backup'))
     args = parser.parse_args()
     return args
